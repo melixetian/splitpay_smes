@@ -1,0 +1,19 @@
+# FastAPI
+fastapi
+uvicorn[standard]
+pydantic
+
+# Database
+sqlalchemy
+aiosqlite
+alembic
+
+# Formatting
+black
+isort
+flake8
+
+# Testing
+pytest
+pytest-asyncio
+httpx
