@@ -9,7 +9,7 @@ from app.storage.db import get_db_session
 router = APIRouter()
 
 
-@router.post("/events", response_model=EventIngestResponse)
+@router.post("/events", response_model=EventIngestResponse, tags=["Events"])
 async def ingest_event(
     payload: InboundEvent,
     session: AsyncSession = Depends(get_db_session),
@@ -17,7 +17,7 @@ async def ingest_event(
     return await EventService(session).ingest_event(payload)
 
 
-@router.get("/audit/{user_id}", response_model=AuditResponse)
+@router.get("/audit/{user_id}", response_model=AuditResponse, tags=["Audit"])
 async def get_audit(
     user_id: str,
     session: AsyncSession = Depends(get_db_session),
