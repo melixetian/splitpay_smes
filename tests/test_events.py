@@ -136,6 +136,44 @@ class TestEventsEndpoint:
         assert audit.json()["events"]
         assert audit.json()["message_decisions"] == []
 
+    async def test_signup_without_marketing_opt_in_creates_no_welcome_message(self, client: AsyncClient):
+        user_id = "u_test_signup_no_opt_in"
+
+        await self.assert_post_ok(
+            client,
+            {
+                "user_id": user_id,
+                "event_type": "signup_completed",
+                "event_timestamp": "2025-11-01T10:00:00Z",
+                "properties": {},
+                "user_traits": {"marketing_opt_in": False},
+            },
+        )
+
+        audit = await client.get(self.audit_url(user_id))
+        assert audit.status_code == 200
+        messages = audit.json()["message_decisions"]
+        assert not any(item["template_name"] == "WELCOME_EMAIL" for item in messages)
+
+    async def test_payment_failed_without_matching_conditions_creates_no_messages(self, client: AsyncClient):
+        user_id = "u_test_payment_failed_no_match"
+
+        await self.assert_post_ok(
+            client,
+            {
+                "user_id": user_id,
+                "event_type": "payment_failed",
+                "event_timestamp": "2025-11-01T10:00:00Z",
+                "properties": {"failure_reason": "NETWORK_ERROR", "attempt_number": 2},
+                "user_traits": {},
+            },
+        )
+
+        audit = await client.get(self.audit_url(user_id))
+        assert audit.status_code == 200
+        assert audit.json()["events"]
+        assert audit.json()["message_decisions"] == []
+
     async def test_invalid_payload_returns_422(self, client: AsyncClient):
         response = await client.post(
             self.EVENTS_URL,
@@ -144,6 +182,19 @@ class TestEventsEndpoint:
                 "event_timestamp": "2025-11-01T10:00:00Z",
                 "properties": {},
                 "user_traits": {},
+            },
+        )
+        assert response.status_code == 422
+
+    async def test_timestamp_without_timezone_returns_422(self, client: AsyncClient):
+        response = await client.post(
+            self.EVENTS_URL,
+            json={
+                "user_id": "u_test_bad_timestamp",
+                "event_type": "signup_completed",
+                "event_timestamp": "2025-11-01T10:00:00",
+                "properties": {},
+                "user_traits": {"marketing_opt_in": True},
             },
         )
         assert response.status_code == 422
