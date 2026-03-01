@@ -3,8 +3,10 @@ REVISION?=head
 DOWNGRADE_STEP?=-1
 
 VENV=.venv
-PIP=.venv/bin/pip
-DC=docker-compose
+PIP=$(VENV)/bin/pip
+
+PY=$(VENV)/bin/python
+DC=docker compose
 
 install:
 	test -d $(VENV) || python3 -m venv $(VENV)
@@ -41,7 +43,7 @@ clean:
 	$(DC) down --volumes --remove-orphans
 
 test:
-	python -m pytest tests/
+	$(PY) -m pytest tests/
 
 .PHONY: \
 	install build backend run down \
