@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from app.schemas.template import TemplateName
+
 
 class AuditEventItem(BaseModel):
     id: int
@@ -15,7 +17,7 @@ class AuditEventItem(BaseModel):
 class AuditMessageItem(BaseModel):
     id: int
     user_id: str
-    template_name: str
+    template_name: TemplateName
     channel: str
     timestamp: datetime
     reason: str

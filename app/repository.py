@@ -5,6 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.event import InboundEvent
+from app.schemas.template import TemplateName
 from app.storage.models import EventRecord, MessageRecord
 
 
@@ -52,7 +53,7 @@ class Repository:
     async def create_message_decision(
         self,
         user_id: str,
-        template_name: str,
+        template_name: TemplateName,
         channel: str,
         timestamp: datetime,
         reason: str,
@@ -61,7 +62,7 @@ class Repository:
     ) -> MessageRecord:
         record = MessageRecord(
             user_id=user_id,
-            template_name=template_name,
+            template_name=template_name.value,
             channel=channel,
             timestamp=timestamp,
             reason=reason,
@@ -71,11 +72,11 @@ class Repository:
         self.session.add(record)
         return record
 
-    async def latest_sent(self, user_id: str, template_name: str) -> MessageRecord | None:
+    async def latest_sent(self, user_id: str, template_name: TemplateName) -> MessageRecord | None:
         query: sa.Select[tuple[MessageRecord]] = (
             sa.select(MessageRecord)
             .where(MessageRecord.user_id == user_id)
-            .where(MessageRecord.template_name == template_name)
+            .where(MessageRecord.template_name == template_name.value)
             .where(MessageRecord.status == "sent")
             .order_by(MessageRecord.timestamp.desc(), MessageRecord.id.desc())
             .limit(1)
@@ -86,7 +87,7 @@ class Repository:
     async def latest_sent_for_utc_date(
         self,
         user_id: str,
-        template_name: str,
+        template_name: TemplateName,
         utc_day: date | None = None,
     ) -> MessageRecord | None:
         start = datetime.combine(utc_day, time.min, tzinfo=timezone.utc)
@@ -94,7 +95,7 @@ class Repository:
         query: sa.Select[tuple[MessageRecord]] = (
             sa.select(MessageRecord)
             .where(MessageRecord.user_id == user_id)
-            .where(MessageRecord.template_name == template_name)
+            .where(MessageRecord.template_name == template_name.value)
             .where(MessageRecord.status == "sent")
             .where(MessageRecord.timestamp >= start)
             .where(MessageRecord.timestamp < end)

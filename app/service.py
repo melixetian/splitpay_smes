@@ -35,7 +35,8 @@ class EventService:
                     if previous is not None:
                         status = "suppressed"
                         suppression_reason = (
-                            f"skipped {candidate.template_name}: already sent at {previous.timestamp.isoformat()}"
+                            f"skipped {candidate.template_name.value}: "
+                            f"already sent at {previous.timestamp.isoformat()}"
                         )
                 elif candidate.dedup_policy == DedupPolicy.ONCE_PER_UTC_DAY:
                     previous_today = await self.repository.latest_sent_for_utc_date(
@@ -46,7 +47,7 @@ class EventService:
                     if previous_today is not None:
                         status = "suppressed"
                         suppression_reason = (
-                            f"skipped {candidate.template_name}: "
+                            f"skipped {candidate.template_name.value}: "
                             f"already sent today at {previous_today.timestamp.isoformat()}"
                         )
 

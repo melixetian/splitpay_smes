@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Protocol
 
 from app.schemas.event import EventType, InboundEvent
+from app.schemas.template import TemplateName
 
 
 class EventLookupPort(Protocol):
@@ -25,7 +26,7 @@ class DedupPolicy(str, Enum):
 
 @dataclass(frozen=True)
 class MessageCandidate:
-    template_name: str
+    template_name: TemplateName
     channel: str
     reason: str
     dedup_policy: DedupPolicy
@@ -51,7 +52,7 @@ class WelcomeEmailRule(Rule):
         if event.user_traits.get("marketing_opt_in") is not True:
             return None
         return MessageCandidate(
-            template_name="WELCOME_EMAIL",
+            template_name=TemplateName.WELCOME_EMAIL,
             channel="email",
             reason="signup_completed with marketing_opt_in=true",
             dedup_policy=DedupPolicy.ONCE_EVER,
@@ -74,7 +75,7 @@ class BankLinkNudgeSmsRule(Rule):
             return None
 
         return MessageCandidate(
-            template_name="BANK_LINK_NUDGE_SMS",
+            template_name=TemplateName.BANK_LINK_NUDGE_SMS,
             channel="sms",
             reason="link_bank_success and signup_completed in previous 24h",
             dedup_policy=DedupPolicy.NONE,
@@ -89,7 +90,7 @@ class InsufficientFundsEmailRule(Rule):
         if event.properties.get("failure_reason") != "INSUFFICIENT_FUNDS":
             return None
         return MessageCandidate(
-            template_name="INSUFFICIENT_FUNDS_EMAIL",
+            template_name=TemplateName.INSUFFICIENT_FUNDS_EMAIL,
             channel="email",
             reason='payment_failed with failure_reason="INSUFFICIENT_FUNDS"',
             dedup_policy=DedupPolicy.ONCE_PER_UTC_DAY,
@@ -109,7 +110,7 @@ class HighRiskAlertRule(Rule):
             return None
 
         return MessageCandidate(
-            template_name="HIGH_RISK_ALERT",
+            template_name=TemplateName.HIGH_RISK_ALERT,
             channel="internal_alert",
             reason="payment_failed with attempt_number >= 3",
             dedup_policy=DedupPolicy.NONE,
