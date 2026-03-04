@@ -3,7 +3,7 @@ from sqlalchemy import Column, DateTime, Integer, String, Text
 from app.storage.db import Base
 
 
-class EventRecord(Base):
+class Event(Base):
     __tablename__ = "events"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -13,7 +13,7 @@ class EventRecord(Base):
     raw_payload = Column(Text, nullable=False)
 
 
-class MessageRecord(Base):
+class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
